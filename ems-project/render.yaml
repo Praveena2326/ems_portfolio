@@ -1,0 +1,29 @@
+databases:
+  - name: ems-portfolio-db
+    plan: free
+    databaseName: ems_portfolio
+    user: ems_portfolio
+
+services:
+  - type: web
+    name: ems-portfolio
+    runtime: python
+    plan: free
+    buildCommand: cd frontend && npm ci && npm run build && cd ../backend && bash build.sh
+    startCommand: cd backend && gunicorn ems.wsgi:application
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ems-portfolio-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+      - key: DEMO_ADMIN_USERNAME
+        value: demo
+      - key: DEMO_ADMIN_PASSWORD
+        sync: false
